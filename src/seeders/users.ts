@@ -14,5 +14,7 @@ export const seedUser = async () => {
 
     testUser.password = hashedPassword
 
-    await User.create(testUser)
+    await User.findOneAndUpdate({ email: testUser.email }, testUser, {
+        upsert: true,
+    })
 }
