@@ -1,6 +1,6 @@
 import bcrypt from "bcrypt"
 
-import { User } from "@/models/user"
+import { UserModel } from "@/models/user"
 
 const testUser = {
     name: "Test User",
@@ -14,7 +14,7 @@ export const seedUser = async () => {
 
     testUser.password = hashedPassword
 
-    await User.findOneAndUpdate({ email: testUser.email }, testUser, {
+    await UserModel.findOneAndUpdate({ email: testUser.email }, testUser, {
         upsert: true,
     })
 }

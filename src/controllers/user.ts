@@ -1,12 +1,15 @@
 import { Request, Response } from "express"
 
-import { InsertUserValidator, UpdateUserValidator } from "@/models/user"
+import {
+    InsertUserValidator,
+    UpdateUserValidator,
+    UserModel,
+} from "@/models/user"
 import { asyncHandler } from "@/middlewares/asyncHandler"
-import { User } from "@/models/user"
 
 class UserController {
     getAllUsers = asyncHandler(async (req: Request, res: Response) => {
-        const users = await User.find()
+        const users = await UserModel.find()
         return res.status(200).json(users)
     })
 
@@ -20,7 +23,7 @@ class UserController {
 
         const parsedData = parsedBody.data
 
-        const userEmailOrMobileNoExists = await User.findOne({
+        const userEmailOrMobileNoExists = await UserModel.findOne({
             $or: [
                 { email: parsedData.email },
                 { mobile_number: parsedData.mobile_no },
@@ -36,7 +39,7 @@ class UserController {
             return res.status(400).json({ error: errorMsg })
         }
 
-        const newUser = new User(parsedData)
+        const newUser = new UserModel(parsedData)
         await newUser.save()
 
         const { password, ...userData } = newUser.toObject()
@@ -54,7 +57,7 @@ class UserController {
 
         const parsedData = parsedBody.data
 
-        const userEmailOrMobileNoExists = await User.findOne({
+        const userEmailOrMobileNoExists = await UserModel.findOne({
             _id: { $ne: parsedData.id },
             $or: [
                 { email: parsedData.email },
@@ -71,7 +74,7 @@ class UserController {
             return res.status(400).json({ error: errorMsg })
         }
 
-        const updatedUser = await User.findByIdAndUpdate(
+        const updatedUser = await UserModel.findByIdAndUpdate(
             parsedData.id,
             parsedData,
             { new: true }

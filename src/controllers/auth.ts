@@ -2,7 +2,12 @@ import { Response, Request } from "express"
 import jwt from "jsonwebtoken"
 import bcrypt from "bcrypt"
 
-import { LoginValidator, ResetMyPasswordValidator, User } from "@/models/user"
+import {
+    LoginValidator,
+    ResetMyPasswordValidator,
+    User,
+    UserModel,
+} from "@/models/user"
 import { COOKIE_NAME, COOKIE_OPTIONS, JWT_EXPIRY } from "@/utils/constants"
 import { asyncHandler } from "@/middlewares/asyncHandler"
 import { JWTPayload } from "@/types"
@@ -18,7 +23,7 @@ class AuthController {
 
         const parsedData = parsedBody.data
 
-        const user = await User.findOne({ email: parsedData.email })
+        const user = await UserModel.findOne({ email: parsedData.email })
 
         if (!user) {
             return res.status(400).json({ error: "User not found!" })
@@ -59,7 +64,7 @@ class AuthController {
 
         const decoded = jwt.verify(token, process.env.JWT_SECRET) as JWTPayload
 
-        const user = await User.findById(decoded.id)
+        const user = await UserModel.findById(decoded.id)
 
         if (!user) {
             return res.status(400).json({ error: "User not found!" })
@@ -80,7 +85,7 @@ class AuthController {
 
         const parsedData = parsedBody.data
 
-        const user = await User.findById(authUser.id)
+        const user = await UserModel.findById(authUser.id)
 
         if (!user) {
             return res.status(400).json({ error: "User not found!" })
