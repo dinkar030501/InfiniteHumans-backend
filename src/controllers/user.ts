@@ -6,6 +6,11 @@ import {
     UserModel,
 } from "@/models/user"
 import { asyncHandler } from "@/middlewares/asyncHandler"
+import {
+    UpdateUserProfileValidator,
+    UserProfileModel,
+} from "@/models/userProfile"
+import mongoose from "mongoose"
 
 class UserController {
     getAllUsers = asyncHandler(async (req: Request, res: Response) => {
@@ -81,6 +86,55 @@ class UserController {
         )
 
         res.status(200).json(updatedUser)
+    })
+
+    // User Profile APIs
+
+    getUserProfileByUserId = asyncHandler(
+        async (req: Request, res: Response) => {
+            const { userId } = req.params
+
+            if (!userId) {
+                return res.status(400).json({ error: "User ID is required" })
+            }
+
+            const userProfile = await UserProfileModel.findOne({
+                user_id: new mongoose.Types.ObjectId(userId),
+            })
+
+            if (!userProfile) {
+                return res.status(404).json({ error: "User profile not found" })
+            }
+
+            return res.status(200).json(userProfile)
+        }
+    )
+
+    updateUserProfile = asyncHandler(async (req: Request, res: Response) => {
+        const parsedBody = UpdateUserProfileValidator.safeParse(req.body)
+        if (!parsedBody.success) {
+            return res
+                .status(400)
+                .json({ error: parsedBody.error.issues[0].message })
+        }
+
+        const parsedData = parsedBody.data
+
+        const userProfile = await UserProfileModel.findOne({
+            user_id: new mongoose.Types.ObjectId(parsedData.user_id),
+        })
+
+        if (!userProfile) {
+            return res.status(404).json({ error: "User profile not found" })
+        }
+
+        const updatedUserProfile = await UserProfileModel.findByIdAndUpdate(
+            userProfile._id,
+            parsedData,
+            { new: true }
+        )
+
+        return res.status(200).json(updatedUserProfile)
     })
 }
 

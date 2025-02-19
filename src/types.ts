@@ -8,3 +8,10 @@ export interface JWTPayload {
     iat?: number
     exp?: number
 }
+
+export enum JobCommitment {
+    PART_TIME = "part-time",
+    FULL_TIME = "full-time",
+    FREELANCE = "freelance",
+    CONTRACT = "contract",
+}
