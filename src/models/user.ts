@@ -22,7 +22,7 @@ export const InsertUserValidator = z.object({
         invalid_type_error: "Email must be a string!",
         required_error: "Email is required!",
     }),
-    mobile_no: z.string({
+    mobile_number: z.string({
         invalid_type_error: "Mobile number must be a string!",
         required_error: "Mobile number is required!",
     }),
@@ -73,10 +73,7 @@ const userSchema = new Schema(
             type: String,
             required: [true, "Mobile number is required"],
             unique: true,
-            match: [
-                /^[0-9]{10}$/,
-                "Please enter a valid 10-digit mobile number",
-            ],
+            match: [/^[0-9]{10}$/, "Please enter a valid 10-digit mobile number"],
         },
         password: {
             type: String,
