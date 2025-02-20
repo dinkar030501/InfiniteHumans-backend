@@ -1,15 +1,8 @@
 import { Request, Response } from "express"
 
-import {
-    InsertUserValidator,
-    UpdateUserValidator,
-    UserModel,
-} from "@/models/user"
+import { InsertUserValidator, UpdateUserValidator, UserModel } from "@/models/user"
 import { asyncHandler } from "@/middlewares/asyncHandler"
-import {
-    UpdateUserProfileValidator,
-    UserProfileModel,
-} from "@/models/userProfile"
+import { UpdateUserProfileValidator, UserProfileModel } from "@/models/userProfile"
 import mongoose from "mongoose"
 
 class UserController {
@@ -21,9 +14,7 @@ class UserController {
     addUser = asyncHandler(async (req: Request, res: Response) => {
         const parsedBody = InsertUserValidator.safeParse(req.body)
         if (!parsedBody.success) {
-            return res
-                .status(400)
-                .json({ error: parsedBody.error.issues[0].message })
+            return res.status(400).json({ error: parsedBody.error.issues[0].message })
         }
 
         const parsedData = parsedBody.data
@@ -31,7 +22,7 @@ class UserController {
         const userEmailOrMobileNoExists = await UserModel.findOne({
             $or: [
                 { email: parsedData.email },
-                { mobile_number: parsedData.mobile_no },
+                { mobile_number: parsedData.mobile_number },
             ],
         })
 
@@ -55,9 +46,7 @@ class UserController {
     updateUser = asyncHandler(async (req: Request, res: Response) => {
         const parsedBody = UpdateUserValidator.safeParse(req.body)
         if (!parsedBody.success) {
-            return res
-                .status(400)
-                .json({ error: parsedBody.error.issues[0].message })
+            return res.status(400).json({ error: parsedBody.error.issues[0].message })
         }
 
         const parsedData = parsedBody.data
@@ -66,7 +55,7 @@ class UserController {
             _id: { $ne: parsedData.id },
             $or: [
                 { email: parsedData.email },
-                { mobile_number: parsedData.mobile_no },
+                { mobile_number: parsedData.mobile_number },
             ],
         })
 
@@ -79,43 +68,37 @@ class UserController {
             return res.status(400).json({ error: errorMsg })
         }
 
-        const updatedUser = await UserModel.findByIdAndUpdate(
-            parsedData.id,
-            parsedData,
-            { new: true }
-        )
+        const updatedUser = await UserModel.findByIdAndUpdate(parsedData.id, parsedData, {
+            new: true,
+        })
 
         res.status(200).json(updatedUser)
     })
 
     // User Profile APIs
 
-    getUserProfileByUserId = asyncHandler(
-        async (req: Request, res: Response) => {
-            const { userId } = req.params
+    getUserProfileByUserId = asyncHandler(async (req: Request, res: Response) => {
+        const { userId } = req.params
 
-            if (!userId) {
-                return res.status(400).json({ error: "User ID is required" })
-            }
-
-            const userProfile = await UserProfileModel.findOne({
-                user_id: new mongoose.Types.ObjectId(userId),
-            })
-
-            if (!userProfile) {
-                return res.status(404).json({ error: "User profile not found" })
-            }
-
-            return res.status(200).json(userProfile)
+        if (!userId) {
+            return res.status(400).json({ error: "User ID is required" })
         }
-    )
+
+        const userProfile = await UserProfileModel.findOne({
+            user_id: new mongoose.Types.ObjectId(userId),
+        })
+
+        if (!userProfile) {
+            return res.status(404).json({ error: "User profile not found" })
+        }
+
+        return res.status(200).json(userProfile)
+    })
 
     updateUserProfile = asyncHandler(async (req: Request, res: Response) => {
         const parsedBody = UpdateUserProfileValidator.safeParse(req.body)
         if (!parsedBody.success) {
-            return res
-                .status(400)
-                .json({ error: parsedBody.error.issues[0].message })
+            return res.status(400).json({ error: parsedBody.error.issues[0].message })
         }
 
         const parsedData = parsedBody.data

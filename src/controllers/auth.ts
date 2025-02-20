@@ -2,12 +2,7 @@ import { Response, Request } from "express"
 import jwt from "jsonwebtoken"
 import bcrypt from "bcrypt"
 
-import {
-    LoginValidator,
-    ResetMyPasswordValidator,
-    User,
-    UserModel,
-} from "@/models/user"
+import { LoginValidator, ResetMyPasswordValidator, User, UserModel } from "@/models/user"
 import { COOKIE_NAME, COOKIE_OPTIONS, JWT_EXPIRY } from "@/utils/constants"
 import { asyncHandler } from "@/middlewares/asyncHandler"
 import { JWTPayload } from "@/types"
@@ -16,23 +11,20 @@ class AuthController {
     login = asyncHandler(async (req: Request, res: Response) => {
         const parsedBody = LoginValidator.safeParse(req.body)
         if (!parsedBody.success) {
-            return res
-                .status(400)
-                .json({ error: parsedBody.error.issues[0].message })
+            return res.status(400).json({ error: parsedBody.error.issues[0].message })
         }
 
         const parsedData = parsedBody.data
 
-        const user = await UserModel.findOne({ email: parsedData.email })
+        const user = await UserModel.findOne({ email: parsedData.email }).select(
+            "+password"
+        )
 
         if (!user) {
             return res.status(400).json({ error: "User not found!" })
         }
 
-        const isPasswordCorrect = await bcrypt.compare(
-            parsedData.password,
-            user.password
-        )
+        const isPasswordCorrect = await bcrypt.compare(parsedData.password, user.password)
 
         if (!isPasswordCorrect) {
             return res.status(400).json({ error: "Invalid password!" })
@@ -55,8 +47,7 @@ class AuthController {
 
     getLoggedInUser = asyncHandler(async (req: Request, res: Response) => {
         const token =
-            req.cookies?.innfinexBackend ??
-            req.headers.authorization?.split(" ")[1]
+            req.cookies?.innfinexBackend ?? req.headers.authorization?.split(" ")[1]
 
         if (!token) {
             return res.status(400).json({ error: "Token missing!" })
@@ -76,9 +67,7 @@ class AuthController {
     resetMyPassword = asyncHandler(async (req: Request, res: Response) => {
         const parsedBody = ResetMyPasswordValidator.safeParse(req.body)
         if (!parsedBody.success) {
-            return res
-                .status(400)
-                .json({ error: parsedBody.error.issues[0].message })
+            return res.status(400).json({ error: parsedBody.error.issues[0].message })
         }
 
         const authUser = req.authUser as User
